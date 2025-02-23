@@ -85,11 +85,12 @@ const signInAuth = async (req, res, next) => {
 
 }
 
-const adminTokenAuth = async (req, res, next) => {
+const adminTokenAuth = async(req, res, next) => {
     let token = req.headers.authorization
     let verification = jwt.verify(token, JWT_ADMIN_SECRET);
     if (verification){
-        let tokenData = jwt.decode(req.headers.authorization);
+        let tokenData = jwt.decode(token);
+        req.adminId = tokenData.userId;
         next();
     } else{
         res.status(401).json({

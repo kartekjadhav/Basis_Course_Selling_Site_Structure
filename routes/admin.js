@@ -58,11 +58,12 @@ adminRouter.post('/courses', adminTokenAuth, async (req, res) => {
             });
             return;    
         }
-        await courseModel.create({
+        course = await courseModel.create({
             title, description, price, imageurl,
             creatorId: tokenData.userId
-        });
+        }); 
         res.status(201).json({
+            courseId: course._id,
             message: "Course has been added",
         })
     } catch (error) {
@@ -75,7 +76,34 @@ adminRouter.post('/courses', adminTokenAuth, async (req, res) => {
 
 
 adminRouter.put('/courses', adminTokenAuth, async (req, res) => {
-    let userId = bcrypt.decode()
+    let adminId = req.adminId;
+    let { title, description, price, imageurl, courseId } = req.body;
+    let updateData = {
+        title, description, price, imageurl
+    }
+    try{
+        let result = await courseModel.updateOne(
+        {
+            creatorId: adminId,
+            _id: courseId
+        },
+        {
+            $set: updateData
+        }
+        )
+        if (result.modifiedCount === 0){
+            return res.status(404).json({
+                message: "No course found to update"
+            })    
+        }
+        res.status(200).json({
+            message: "Course has been updated"
+        })
+    }catch {
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
 })
 
 module.exports = {
